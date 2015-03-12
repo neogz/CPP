@@ -1,0 +1,394 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+char crt[] = { "-------------------------------------------------------\n" };
+
+template<class T1, class T2>
+class Kolekcija{
+	T1 * _elementi1;
+	T2 * _elementi2;
+	int _trenutnoElemenata;
+public:
+	Kolekcija(){
+		_elementi1 = nullptr;
+		_elementi2 = nullptr;
+		_trenutnoElemenata = 0;
+	}
+	Kolekcija(const Kolekcija & obj){
+		_trenutnoElemenata = obj._trenutnoElemenata;
+		
+		_elementi1 = new T1[_trenutnoElemenata];
+		_elementi2 = new T2[_trenutnoElemenata];
+
+		for (int i = 0; i < _trenutnoElemenata; i++){
+			_elementi1[i] = obj._elementi1[i];
+			_elementi2[i] = obj._elementi2[i];
+		}
+	}
+	~Kolekcija(){
+		delete[]_elementi1;
+		delete[]_elementi2;
+		_elementi1 = nullptr;
+		_elementi2 = nullptr;
+	}
+	// 
+	bool addElement(T1 e1, T2 e2){
+		for (int i = 0; i < _trenutnoElemenata; i++)
+			if (_elementi1[i] == e1 && _elementi2[i] == e2)
+				return false;
+		T1 * temp1 = new T1[_trenutnoElemenata + 1];
+		T2 * temp2 = new T2[_trenutnoElemenata + 1];
+
+		for (int i = 0; i < _trenutnoElemenata; i++){
+			temp1[i] = _elementi1[i];
+			temp2[i] = _elementi2[i];
+		}
+		delete[]_elementi1;
+		delete[]_elementi2;
+
+		_elementi1 = temp1;
+		_elementi2 = temp2;
+
+		_elementi1[_trenutnoElemenata] = e1;
+		_elementi2[_trenutnoElemenata] = e2;
+
+		_trenutnoElemenata++;
+		return true;
+	}
+	bool removeElement(T1 element){
+		for (int i = 0; i < _trenutnoElemenata; i++){
+			if (_elementi1[i] == element){
+				T1 * temp1 = new T1[_trenutnoElemenata - 1];
+				T2 * temp2 = new T2[_trenutnoElemenata - 1];
+				for (int j = 0; j < i; j++){
+					temp1[j] = _elementi1[j];
+					temp2[j] = _elementi2[j];
+				}
+				for (int j = i; j < _trenutnoElemenata-1; j++){
+					temp1[j] = _elementi1[j+1];
+					temp2[j] = _elementi2[j+1];
+				}
+				delete[]_elementi1;
+				delete[]_elementi2;
+				_elementi1 = temp1;
+				_elementi2 = temp2;
+				_trenutnoElemenata--;
+				return true;
+			}
+		}
+		return false;
+	}
+	Kolekcija operator - (const Kolekcija & obj){
+		Kolekcija temp;
+		for (int i = 0; i < _trenutnoElemenata; i++){
+			temp.addElement(_elementi1[i], _elementi2[i]);
+		}
+		for (int i = 0; i < obj._trenutnoElemenata; i++){
+			temp.addElement(obj._elementi1[i], obj._elementi2[i]);
+		}
+		return temp;
+	}
+	//
+	int getTrenutno()const {
+		return _trenutnoElemenata;
+	}
+	T1 & getElement1(int id){
+		return _elementi1[id];
+	}
+	T2 & getElement2(int id){
+		return _elementi2[id];
+	}
+	friend ostream & operator << <>(ostream & cout, const Kolekcija<T1,T2> & obj);
+};
+class Datum{
+	int *_dan, *_mjesec, *_godina;
+public:
+	Datum(int d = 1, int m = 1, int g= 1900){
+		_dan = new int(d);
+		_mjesec = new int(m);
+		_godina = new int(g);
+	}
+	Datum(const Datum & obj){
+		_dan = new int(*obj._dan);
+		_mjesec = new int(*obj._mjesec);
+		_godina = new int(*obj._godina);
+	}
+	~Datum(){
+		delete _dan;
+		delete _mjesec;
+		delete _godina;
+		_dan = nullptr;
+		_mjesec = nullptr;
+		_godina = nullptr;
+	}
+	// = == <<    <		>
+	bool operator == (const Datum & obj){
+		if (*_dan == *obj._dan && *_mjesec == *obj._mjesec && *_godina == *obj._godina) return true;
+		else return false;
+	}
+	Datum & operator =(const Datum & obj){
+		if (this != &obj){
+			delete _dan;
+			delete _mjesec;
+			delete _godina;
+			_dan = new int(*obj._dan);
+			_mjesec = new int(*obj._mjesec);
+			_godina = new int(*obj._godina);
+		}
+		return *this;
+	}
+	bool operator <(const Datum & obj){
+		if ((*_godina < *obj._godina) || (*_godina == *obj._godina && *_mjesec < *obj._mjesec) || (*_godina == *obj._godina && *_mjesec == *obj._mjesec && *_dan < *obj._dan)) return true;
+		else return false;
+		
+	}
+	bool operator >(const Datum & obj){
+		if (*this < obj) return false;
+		else return true;
+	}
+	friend ostream & operator <<(ostream & cout, const Datum & obj);
+};
+class Pregled{
+	char * _dijagnoza;
+	vector<string> _terapije;
+	Datum * _datumPregleda;
+public:
+	Pregled(char * dijagnoza, Datum datumPregleda){
+		int vel = strlen(dijagnoza) + 1;
+		_dijagnoza = new char[vel];
+		strcpy_s(_dijagnoza, vel, dijagnoza);
+
+		_datumPregleda = new Datum(datumPregleda);
+	}
+	Pregled(const Pregled & obj){
+		int vel = strlen(obj._dijagnoza) + 1;
+		_dijagnoza = new char[vel];
+		strcpy_s(_dijagnoza, vel, obj._dijagnoza);
+
+		_datumPregleda = new Datum(*obj._datumPregleda);
+		for (int i = 0; i < obj._terapije.size(); i++){
+			_terapije.push_back(obj._terapije.at(i));
+		}
+	}
+	~Pregled(){
+		delete[] _dijagnoza;
+		delete _datumPregleda;
+		_dijagnoza = nullptr;
+		_datumPregleda = nullptr;
+	}
+	// ==  =  << 
+	bool operator == (const Pregled & obj){
+		if (strcmp(_dijagnoza, obj._dijagnoza) == 0 && _datumPregleda == obj._datumPregleda)return true;
+		else return false;
+	}
+	Pregled & operator =(const Pregled & obj){
+		if (this != &obj){
+			delete[] obj._dijagnoza;
+			delete   obj._datumPregleda;
+			int vel = strlen(obj._dijagnoza) + 1;
+			_dijagnoza = new char[vel];
+			strcpy_s(_dijagnoza, vel, obj._dijagnoza);
+
+			_datumPregleda = new Datum(*obj._datumPregleda);
+
+			_terapije.erase(_terapije.begin(), _terapije.end());
+			for (int i = 0; i < obj._terapije.size(); i++){
+				_terapije.push_back(obj._terapije.at(i));
+			}
+
+
+		}
+		return *this;
+	}
+	friend ostream & operator <<(ostream & cout, Pregled & obj);
+	// -------------------------------------------------------------------
+	bool addTerapija(string terapija){
+
+		vector<string>::iterator it = _terapije.begin();
+
+		for (it; it!=_terapije.end(); it++)
+			if (*it == terapija)
+				return false; 
+
+		// provjeriti 216
+		_terapije.push_back(terapija);
+		
+	}
+	bool removeTerapija(string terapija){
+
+		vector<string>::iterator it = _terapije.begin();
+
+		for (it; it!=_terapije.end(); it++)
+			if (*it == terapija){
+			_terapije.erase(it);
+
+			// 2nd way
+			//_terapije.erase(_terapije.begin()+i);
+				return true;
+			}
+				
+				
+	return false;
+	}
+	vector<string> & getTerapije(){
+		return _terapije;
+	}
+	Datum getDatumPregleda(){
+		return *_datumPregleda;
+	}
+	
+};
+class Pacijent{
+protected:
+	static int brojpacijenata;
+	const int _pacijentID;
+	char _imePrezime[20]; //  pacijenta
+	Kolekcija<string, Pregled *> * _preglediPacijenta;
+	// string za ime i prezime doktora 
+public:
+	Pacijent(char * imePrezime):_pacijentID(++brojpacijenata){
+		strcpy_s(_imePrezime, 20, imePrezime);
+		
+		_preglediPacijenta = new Kolekcija < string, Pregled * > ;
+
+	}
+	Pacijent(const Pacijent & obj) :_pacijentID(++brojpacijenata){
+		strcpy_s(_imePrezime, 20, obj._imePrezime);
+
+		_preglediPacijenta = new Kolekcija < string, Pregled * >[obj._preglediPacijenta->getTrenutno()];
+		for (int i = 0; i < obj._preglediPacijenta->getTrenutno(); i++)
+			_preglediPacijenta->addElement(obj._preglediPacijenta->getElement1(i), obj._preglediPacijenta->getElement2(i));
+		
+	}
+	~Pacijent(){
+		delete	 _preglediPacijenta;
+		_preglediPacijenta = nullptr;
+	}
+
+	friend ostream & operator << (ostream & cout, const Pacijent & obj);
+	Pregled & operator [](string terapija){
+		for (int i = 0; i < _preglediPacijenta->getTrenutno(); i++){
+			for (int j = _preglediPacijenta->getElement2(i)->getTerapije().size(); j > 0; j--){
+				if (_preglediPacijenta->getElement2(i)->getTerapije().at(j) == terapija)
+					return *_preglediPacijenta->getElement2(i);
+			}
+		}
+	}
+	bool addPregled(string doktor, Pregled & obj){
+		for (int i = 0; i < _preglediPacijenta->getTrenutno(); i++){
+			if (*_preglediPacijenta->getElement2(i) == obj){
+				return false;
+			}
+		}
+
+		_preglediPacijenta->addElement(doktor, &obj);
+		return true;
+	}
+	bool RemovePregledByDatum(const Datum & d){
+		bool uklonjen_bar_1 = false;
+		for (int i = 0; i < _preglediPacijenta->getTrenutno(); i++){
+			if (_preglediPacijenta->getElement2(i)->getDatumPregleda() < d){
+
+				// pregledan je datuma x koji je < od datuma d
+				// ukloni
+				_preglediPacijenta->removeElement(_preglediPacijenta->getElement1(i));
+				i--; // ovo je kljuc !!!! hehehhe
+				uklonjen_bar_1 = true;
+			}
+		}
+		if (uklonjen_bar_1 == true) return true;
+		else return false;
+	}
+	int RemovePregledByLjekar(string imedoktora){
+		int brojac = 0;
+		for (int i = 0; i < _preglediPacijenta->getTrenutno(); i++){
+			if (_preglediPacijenta->getElement1(i) == imedoktora){
+				_preglediPacijenta->removeElement(imedoktora);
+				i--; // hehhehe ;)
+				brojac++;
+			}
+		}
+		return brojac;
+	}
+};
+//  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+int Pacijent::brojpacijenata = 0;
+template<class T1, class T2>
+ostream & operator <<(ostream & cout, const Kolekcija<T1,T2> & obj){
+	cout << crt << "\t\t :: KOLEKCIJA :: \n" <<crt;
+	for (int i = 0; i < obj._trenutnoElemenata; i++){
+		cout << obj._elementi1[i] << "  -  " << obj._elementi2[i] << endl;
+	}
+	cout << crt;
+	return cout;
+}
+ostream & operator <<(ostream & cout, const Datum & obj){
+	cout << "[" << *obj._dan << "/" << *obj._mjesec << "/" << *obj._godina << "]" << endl;
+	return cout;
+}
+ostream & operator <<(ostream & cout, Pregled & obj){
+	cout << crt << "\t\t :: PREGLED :: \n" << crt;
+	cout << "DIJAGNOZA:      " << obj._dijagnoza << endl;
+	cout << "DATUM PREGLEDA: " << *obj._datumPregleda;
+	cout << "TERAPIJE: " << endl;
+
+	sort(obj._terapije.begin(), obj._terapije.end());
+
+	ostream_iterator<string> it(cout, "\n");
+	copy(obj._terapije.begin(), obj._terapije.end(), it);
+
+	// 2nd way
+	//for (int i = 0; i < obj._terapije.size(); i++)
+	//	cout << obj._terapije.at(i) << endl;
+
+	return cout;
+}
+ostream & operator << (ostream & cout, const Pacijent & obj){
+	cout << crt << "\t\t :: PACIJENT :: \n" << crt;
+	cout << "PACIJENT ID:     " << obj._pacijentID << "\nPACIJENT PODACI: " << obj._imePrezime << endl;
+	for (int i = 0; i < obj._preglediPacijenta->getTrenutno(); i++){
+		cout << crt <<"DOKTOR PODACI:  " << obj._preglediPacijenta->getElement1(i) << endl;
+		cout << *obj._preglediPacijenta->getElement2(i);
+	}
+	return cout;
+}
+
+int main(){
+	// provjeriti 216 liniju
+	Datum d1(13, 1, 1995);
+	Datum d2(10, 4, 2015);
+	Datum d3(13, 9, 2015);
+	Datum d4(21, 12, 2015);
+
+	Pregled p1("P1 Dijagnoza", d1);
+	Pregled p2("P2 Dijagnoza", d2);
+	Pregled p3("P3 Dijagnoza", d3);
+	Pregled p2c("P2 DIjagnoa kopija", d2);
+
+	Pacijent nedim("Nedim Fejzic");
+	Pacijent micko("Mirnes Turkovic");
+
+	//nedim.addPregled("DOKTOR1", p1);
+	nedim.addPregled("DOKTOR2", p2);
+	nedim.addPregled("DOKTOR2", p1);
+	// test remove by ljekar - RADI
+	
+
+	// test remove by datum
+	nedim.addPregled("DOKTOR1", p1);
+	nedim.addPregled("DOKTOR1", p2);
+	nedim.addPregled("DOKTOR1", p3);
+	nedim.addPregled("DOKTOR1", p2c);
+
+	cout << crt << "FUNKCIJA .RemovePregledByLjekar je uklonila: " << nedim.RemovePregledByLjekar("DOKTOR2") << " pregleda. \n" << crt;
+	nedim.RemovePregledByDatum(d4); // treba sve ukloniti
+	cout << nedim;
+	
+	
+
+	system("pause > null");
+	return 0;
+}
