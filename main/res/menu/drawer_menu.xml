@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+
+        <item
+            android:id="@+id/scan"
+            android:title="Scan devices and connect"
+            android:icon="@drawable/ikona_skeniraj"></item>
+
+        <item
+            android:id="@+id/discoverable"
+            android:title="Enable discoverable"
+            android:icon="@drawable/ikona_vidljiv"></item>
+
+        <item android:title="Help">
+
+            <menu>
+
+                <item
+                    android:id="@+id/help"
+                    android:title="Open help"
+                    android:icon="@drawable/ikona_help"></item>
+            </menu>
+
+
+        </item>
+
+        <item android:title="Settings">
+
+            <menu>
+                <item
+                    android:id="@+id/meniKomande"
+                    android:title="Change commands arguments"
+                    android:icon="@drawable/ikona_komande"></item>
+
+            </menu>
+
+
+        </item>
+
+
+
+
+
+
+
+
+    </group>
+
+
+
+
+</menu>
